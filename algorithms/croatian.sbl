@@ -8,7 +8,8 @@
  *   Nikola Ljubešić, Damir Boras, Ozren Kubelka (2007), "Retrieving Information
  *   in Croatian: Building a Simple and Efficient Rule-Based Stemmer".
  * The rules below are generated from those tables by a script: one among per
- * rule line, tried in the original order.
+ * rule line, tried in the original order.  Endings that can never apply, because
+ * an earlier line always applies first, are left out.
  *
  * Words containing a c-caron, c-acute, s-caron, z-caron or d-stroke use the rules as
  * published; all other words use the same rules with those letters folded to
@@ -19,14 +20,13 @@
 
 routines (
     mark_regions mark_diacritics stopword R1 aR1 Transform Strip
-    more a_more not_o_more K_1 K_2 K_3 K_4 K_5 K_6 K_7 K_8 K_9 K_10 K_11
+    a_more rest_sta not_o_more K_1 K_2 K_3 K_4 K_5 K_6 K_7 K_8 K_9 K_10 K_11
     K_12 K_13 K_14 aK_14 K_15 K_16 K_17 K_18 K_19 K_20 K_21 K_22 K_23 K_24
-    K_25 K_26 K_27 K_28 K_29 K_30 K_31 K_32 K_33 aK_33 K_34 K_35 K_36 K_37
-    K_38 K_39 K_40 aK_40 K_41 K_42 K_43 K_44 K_45 aK_45 K_46 aK_46 K_47
-    aK_47 K_48 aK_48 K_49 aK_49 K_50 aK_50 K_51 aK_51 K_52 aK_52 K_53 aK_53
-    K_54 K_55 K_56 aK_56 K_57 aK_57 K_58 aK_58 K_59 aK_59 K_60 aK_60 K_61
-    aK_61 K_62 aK_62 K_63 aK_63 K_64 aK_64 K_65 aK_65 K_66 K_67 K_68 K_69
-    aK_69
+    K_25 K_26 K_27 K_28 K_29 K_30 K_31 K_32 K_33 K_34 K_35 K_36 K_37 K_38
+    K_39 K_40 aK_40 K_41 K_42 K_43 K_44 K_45 aK_45 K_46 aK_46 K_47 aK_47
+    K_48 aK_48 K_49 aK_49 K_50 aK_50 K_51 aK_51 K_52 aK_52 K_53 aK_53 K_54
+    K_55 K_56 aK_56 K_57 K_58 aK_58 K_59 K_60 aK_60 K_61 aK_61 K_62 aK_62
+    K_63 aK_63 K_64 K_66 K_67 K_68 K_69 aK_69
 )
 
 externals ( stem )
@@ -37,10 +37,11 @@ integers ( p1 )
 
 groupings (
     vr sa
-    g_adeo g_aei g_aeiu g_aes g_aesv g_aeu g_aio g_bcdefgjknrtuvcjcv
-    g_bcdfglmnprstzzv g_bcdhjklnprsvz g_bcdhjklnprsvzcjdjsvzv g_bcdlmprsz
-    g_bdlmprscvsvzv g_bgjkntv g_cdlr g_cjstz g_clrcjcvdj g_dklm g_ei g_eiko
-    g_eo g_gmprt g_inu g_jtcvsvzv g_lm g_o g_ssv g_z
+    g_adeo g_aei g_aeipru g_aeiu g_aes g_aesv g_aeu g_aio
+    g_bcdefgjknrtuvcjcv g_bcdfglmnprstzzv g_bcdhjklnprsvz
+    g_bcdhjklnprsvzcjdjsvzv g_bcdlmprsz g_bdlmprscvsvzv g_bgjkntv g_cdlr
+    g_cjstz g_clrcjcvdj g_dklm g_ei g_eiko g_eo g_gmprt g_inu g_jtcvsvzv
+    g_lm g_o g_ssv g_z
 )
 
 stringescapes {}
@@ -57,6 +58,7 @@ define vr 'aeiour'
 define sa '{cv}{c'}{zv}{sv}{d/}'
 define g_adeo 'adeo'
 define g_aei 'aei'
+define g_aeipru 'aeipru'
 define g_aeiu 'aeiu'
 define g_aes 'aes'
 define g_aesv 'ae{sv}'
@@ -329,8 +331,8 @@ backwardmode (
     )
 
     /* conditions in the among of a stem pattern: the rest of an alternative, then '.+' */
-    define more as ( next )
     define a_more as ( no_diacritics next )
+    define rest_sta as ( ( g_aeipru next ) or ( no_diacritics next ) )
     define not_o_more as ( non-g_o next )
 
     /* K_n: the stem left of an ending of rule line n is valid and matches the line's pattern
@@ -389,7 +391,6 @@ backwardmode (
         ( 'i{sv}t' next )
     )
     define K_33 as ( R1 'ova' next )
-    define aK_33 as ( no_diacritics K_33 )
     define K_34 as ( R1 'v' g_aei next )
     define K_35 as ( R1 'ov' non-g_dklm next )
     define K_36 as ( R1 'ov' g_lm next )
@@ -441,13 +442,11 @@ backwardmode (
     define K_51 as (
         R1
         among (
-            'asta' more 'esta' more 'ista' more 'psta' more 'rsta' more 'usta' more
-            'aja' more 'aka' more 'ara' more 'ata' more 'cka' more 'eta' more
-            'ika' more 'ima' more 'ita' more 'lja' more 'nja' more 'oja' more
-            'ota' more 'ska' a_more 'sta' a_more 'uca' more 'uka' more 'uta' more
-            'zna' more 'zva' more '{cv}ka' more '{sv}ka' more '{sv}ta' more
-            'ga' not_o_more
+            'aja' 'aka' 'ara' 'ata' 'cka' 'eta' 'ika' 'ima' 'ita' 'lja' 'nja' 'oja'
+            'ota' 'ska' a_more 'sta' rest_sta 'uca' 'uka' 'uta' 'zna' 'zva' '{cv}ka'
+            '{sv}ka' '{sv}ta' 'ga' not_o_more
         )
+        next
     )
     define aK_51 as ( no_diacritics K_51 )
     define K_52 as ( R1 'ur' next )
@@ -467,27 +466,26 @@ backwardmode (
     )
     define aK_56 as ( no_diacritics K_56 )
     define K_57 as ( R1 'sta' g_aio next )
-    define aK_57 as ( no_diacritics K_57 )
     define K_58 as ( R1 'ta' next )
     define aK_58 as ( no_diacritics K_58 )
     define K_59 as ( R1 'inj' next )
-    define aK_59 as ( no_diacritics K_59 )
     define K_60 as ( R1 'as' next )
     define aK_60 as ( no_diacritics K_60 )
     define K_61 as (
         R1
         among (
-            'elji' more 'titi' more 'ulji' more 'aci' more 'avi' more 'eti' more
-            'ici' a_more 'i{cv}i' more 'odi' more 'oji' more 'ovi' more
+            'elji' 'titi' 'ulji' 'aci' 'avi' 'eti' 'ici' a_more 'i{cv}i' 'odi' 'oji'
+            'ovi'
         )
+        next
     )
     define aK_61 as ( no_diacritics K_61 )
     define K_62 as (
         R1
         among (
-            'jebi' more 'titi' more 'ari' more 'edi' more 'ici' a_more 'i{cv}i' more
-            'usi' a_more 'u{sv}i' more
+            'jebi' 'titi' 'ari' 'edi' 'ici' a_more 'i{cv}i' 'usi' a_more 'u{sv}i'
         )
+        next
     )
     define aK_62 as ( no_diacritics K_62 )
     define K_63 as (
@@ -501,9 +499,6 @@ backwardmode (
         ( no_diacritics 'luc' next ) or
         ( 'lu{cv}' next )
     )
-    define aK_64 as ( no_diacritics K_64 )
-    define K_65 as ( R1 'jeti' next )
-    define aK_65 as ( no_diacritics K_65 )
     define K_66 as ( R1 'e' next )
     define K_67 as ( R1 'i' next )
     define K_68 as ( R1 'at' next )
@@ -514,6 +509,9 @@ backwardmode (
        picks the ending whose stem matches the pattern; at most one ending of a line can (the
        generating script checks this), so if its stem is not valid the among fails and the next
        line is tried, as in the original.  An empty ending is the alternative after `or`. */
+    /* Left out, because an earlier line always applies first (checked by the generating script):
+         .+jeti smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o
+         .+ nijega|nijemu|nijima|nijeg|nijem|nijim|nijih|nima|niji|nije|nija|niju|noj|nom|nog|nim|nih|an|na|nu|ni|ne|no */
     define Strip as (
         // .+(s|š)k ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u
         ( [substring] among (
@@ -665,7 +663,7 @@ backwardmode (
         or
         // .+(a|d|e|o)r ama|ima|om|u|a|e|i|
         ( [substring] among (
-            'ama' K_24 'ima' K_24 'om' K_24 'a' K_24 'e' K_24 'i' K_24 'u' K_24
+            'ima' K_24 'om' K_24 'a' K_24 'e' K_24 'i' K_24 'u' K_24
           ) delete )
         or K_24
         or
@@ -721,8 +719,8 @@ backwardmode (
         or
         // .+ova smo|ste|hu|ti|še|li|la|le|lo|t|h|o
         ( [substring] among (
-            '{sv}e' K_33 'smo' K_33 'ste' K_33 'hu' K_33 'la' K_33 'le' K_33
-            'li' K_33 'lo' K_33 'se' aK_33 'ti' K_33 'h' K_33 'o' K_33 't' K_33
+            'smo' K_33 'ste' K_33 'hu' K_33 'la' K_33 'le' K_33 'li' K_33 'lo' K_33
+            'ti' K_33 'h' K_33 'o' K_33 't' K_33
           ) delete )
         or
         // .+(a|e|i)v ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|ama|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|
@@ -753,11 +751,10 @@ backwardmode (
         or
         // .+el ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|
         ( [substring] among (
-            'ijega' K_37 'ijemu' K_37 'ijima' K_37 'ijeg' K_37 'ijem' K_37
-            'ijih' K_37 'ijim' K_37 'ijoj' K_37 'ija' K_37 'ije' K_37 'iji' K_37
-            'iju' K_37 'ima' K_37 'oga' K_37 'ome' K_37 'omu' K_37 'ih' K_37
-            'im' K_37 'og' K_37 'oj' K_37 'om' K_37 'a' K_37 'e' K_37 'i' K_37
-            'o' K_37 'u' K_37
+            'ijega' K_37 'ijemu' K_37 'ijeg' K_37 'ijem' K_37 'ijih' K_37
+            'ijim' K_37 'ijoj' K_37 'ima' K_37 'ome' K_37 'omu' K_37 'ih' K_37
+            'im' K_37 'oj' K_37 'om' K_37 'a' K_37 'e' K_37 'i' K_37 'o' K_37
+            'u' K_37
           ) delete )
         or K_37
         or
@@ -771,18 +768,13 @@ backwardmode (
           ) delete )
         or
         // .+čin ama|ome|omu|oga|ima|og|om|im|ih|oj|a|u|i|o|e|
-        ( [substring] among (
-            'ama' K_39 'ima' K_39 'oga' K_39 'ome' K_39 'omu' K_39 'ih' K_39
-            'im' K_39 'og' K_39 'oj' K_39 'om' K_39 'a' K_39 'e' K_39 'i' K_39
-            'o' K_39 'u' K_39
-          ) delete )
-        or K_39
+        K_39
         or
         // .+roši vši|smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o
         ( [substring] among (
-            'v{sv}i' K_40 '{sv}e' K_40 '{sv}' K_40 'smo' K_40 'ste' K_40 'vsi' aK_40
-            'la' K_40 'le' K_40 'li' K_40 'lo' K_40 'mo' K_40 'se' aK_40 'te' K_40
-            'ti' K_40 'h' K_40 'm' K_40 'o' K_40 's' aK_40 't' K_40
+            'v{sv}i' K_40 'smo' K_40 'vsi' aK_40 'la' K_40 'le' K_40 'li' K_40
+            'lo' K_40 'mo' K_40 'te' K_40 'ti' K_40 'h' K_40 'm' K_40 'o' K_40
+            't' K_40
           ) delete )
         or
         // .+oš ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|
@@ -797,21 +789,19 @@ backwardmode (
         or
         // .+(e|o)vit ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u|
         ( [substring] among (
-            'ijega' K_42 'ijemu' K_42 'ijima' K_42 'ijeg' K_42 'ijem' K_42
-            'ijih' K_42 'ijim' K_42 'ijoj' K_42 'ija' K_42 'ije' K_42 'iji' K_42
-            'ima' K_42 'oga' K_42 'ome' K_42 'omu' K_42 'ih' K_42 'im' K_42
-            'og' K_42 'oj' K_42 'om' K_42 'a' K_42 'e' K_42 'i' K_42 'o' K_42
-            'u' K_42
+            'ijega' K_42 'ijemu' K_42 'ijeg' K_42 'ijem' K_42 'ijih' K_42
+            'ijim' K_42 'ijoj' K_42 'ima' K_42 'oga' K_42 'ome' K_42 'omu' K_42
+            'ih' K_42 'im' K_42 'og' K_42 'oj' K_42 'om' K_42 'a' K_42 'e' K_42
+            'i' K_42 'o' K_42 'u' K_42
           ) delete )
         or K_42
         or
         // .+ast ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u|
         ( [substring] among (
-            'ijega' K_43 'ijemu' K_43 'ijima' K_43 'ijeg' K_43 'ijem' K_43
-            'ijih' K_43 'ijim' K_43 'ijoj' K_43 'ija' K_43 'ije' K_43 'iji' K_43
-            'ima' K_43 'oga' K_43 'ome' K_43 'omu' K_43 'ih' K_43 'im' K_43
-            'og' K_43 'oj' K_43 'om' K_43 'a' K_43 'e' K_43 'i' K_43 'o' K_43
-            'u' K_43
+            'ijega' K_43 'ijemu' K_43 'ijeg' K_43 'ijem' K_43 'ijih' K_43
+            'ijim' K_43 'ijoj' K_43 'ima' K_43 'oga' K_43 'ome' K_43 'omu' K_43
+            'ih' K_43 'im' K_43 'og' K_43 'oj' K_43 'om' K_43 'a' K_43 'e' K_43
+            'i' K_43 'o' K_43 'u' K_43
           ) delete )
         or K_43
         or
@@ -827,83 +817,69 @@ backwardmode (
         or
         // .+(e|a|i|u)va jući|smo|ste|jmo|jte|ju|la|le|li|lo|mo|na|ne|ni|no|te|ti|še|hu|h|j|m|n|o|t|v|š|
         ( [substring] among (
-            'ju{c'}i' K_45 '{sv}e' K_45 'juci' aK_45 '{sv}' K_45 'jmo' K_45
-            'jte' K_45 'smo' K_45 'ste' K_45 'hu' K_45 'ju' K_45 'la' K_45 'le' K_45
-            'li' K_45 'lo' K_45 'mo' K_45 'na' K_45 'ne' K_45 'ni' K_45 'no' K_45
-            'se' aK_45 'te' K_45 'ti' K_45 'h' K_45 'j' K_45 'm' K_45 'n' K_45
-            'o' K_45 's' aK_45 't' K_45 'v' K_45
+            'ju{c'}i' K_45 'juci' aK_45 'jmo' K_45 'jte' K_45 'smo' K_45 'hu' K_45
+            'ju' K_45 'la' K_45 'le' K_45 'li' K_45 'lo' K_45 'mo' K_45 'te' K_45
+            'ti' K_45 'h' K_45 'j' K_45 'm' K_45 'o' K_45 't' K_45
           ) delete )
         or K_45
         or
         // .+ir ujemo|ujete|ujući|ajući|ivat|ujem|uješ|ujmo|ujte|avši|asmo|aste|ati|amo|ate|aju|aše|ahu|ala|alo|ali|ale|uje|uju|uj|al|an|am|aš|at|ah|ao
         ( [substring] among (
-            'aju{c'}i' K_46 'uju{c'}i' K_46 'av{sv}i' K_46 'uje{sv}' K_46
-            'a{sv}e' K_46 'ajuci' aK_46 'a{sv}' K_46 'ujemo' K_46 'ujete' K_46
-            'ujuci' aK_46 'asmo' K_46 'aste' K_46 'avsi' aK_46 'ivat' K_46
-            'ujem' K_46 'ujes' aK_46 'ujmo' K_46 'ujte' K_46 'ahu' K_46 'aju' K_46
-            'ala' K_46 'ale' K_46 'ali' K_46 'alo' K_46 'amo' K_46 'ase' aK_46
-            'ate' K_46 'ati' K_46 'uje' K_46 'uju' K_46 'ah' K_46 'al' K_46
-            'am' K_46 'an' K_46 'ao' K_46 'as' aK_46 'at' K_46 'uj' K_46
+            'aju{c'}i' K_46 'av{sv}i' K_46 'a{sv}e' K_46 'ajuci' aK_46 'a{sv}' K_46
+            'asmo' K_46 'avsi' aK_46 'ujte' K_46 'ahu' K_46 'ala' K_46 'ale' K_46
+            'ali' K_46 'alo' K_46 'ase' aK_46 'ate' K_46 'ati' K_46 'ah' K_46
+            'al' K_46 'am' K_46 'ao' K_46 'as' aK_46 'at' K_46
           ) delete )
         or
         // .+ač ismo|iste|iti|imo|ite|iše|eći|ila|ilo|ili|ile|ena|eno|eni|ene|io|im|iš|it|ih|en|i|e
         ( [substring] among (
-            'e{c'}i' K_47 'i{sv}e' K_47 'i{sv}' K_47 'ismo' K_47 'iste' K_47
-            'eci' aK_47 'ena' K_47 'ene' K_47 'eni' K_47 'eno' K_47 'ila' K_47
-            'ile' K_47 'ili' K_47 'ilo' K_47 'imo' K_47 'ise' aK_47 'ite' K_47
-            'iti' K_47 'en' K_47 'ih' K_47 'im' K_47 'io' K_47 'is' aK_47 'it' K_47
-            'e' K_47 'i' K_47
+            'e{c'}i' K_47 'ismo' K_47 'eci' aK_47 'ila' K_47 'ile' K_47 'ili' K_47
+            'ilo' K_47 'imo' K_47 'ite' K_47 'iti' K_47 'ih' K_47 'im' K_47
+            'io' K_47 'it' K_47 'e' K_47 'i' K_47
           ) delete )
         or
         // .+ača vši|smo|ste|smo|ste|hu|ti|mo|te|še|la|lo|li|le|ju|na|no|ni|ne|o|m|š|t|h|n
         ( [substring] among (
-            'v{sv}i' K_48 '{sv}e' K_48 '{sv}' K_48 'smo' K_48 'ste' K_48 'vsi' aK_48
-            'hu' K_48 'ju' K_48 'la' K_48 'le' K_48 'li' K_48 'lo' K_48 'mo' K_48
-            'na' K_48 'ne' K_48 'ni' K_48 'no' K_48 'se' aK_48 'te' K_48 'ti' K_48
-            'h' K_48 'm' K_48 'n' K_48 'o' K_48 's' aK_48 't' K_48
+            'v{sv}i' K_48 '{sv}e' K_48 '{sv}' K_48 'smo' K_48 'vsi' aK_48 'hu' K_48
+            'la' K_48 'le' K_48 'li' K_48 'lo' K_48 'mo' K_48 'se' aK_48 'te' K_48
+            'ti' K_48 'h' K_48 'm' K_48 'o' K_48 's' aK_48 't' K_48
           ) delete )
         or
         // .+n uvši|usmo|uste|ući|imo|ite|emo|ete|ula|ulo|ule|uli|uto|uti|uta|em|eš|uo|ut|e|u|i
         ( [substring] among (
-            'uv{sv}i' K_49 'u{c'}i' K_49 'e{sv}' K_49 'usmo' K_49 'uste' K_49
-            'uvsi' aK_49 'emo' K_49 'ete' K_49 'imo' K_49 'ite' K_49 'uci' aK_49
-            'ula' K_49 'ule' K_49 'uli' K_49 'ulo' K_49 'uta' K_49 'uti' K_49
-            'uto' K_49 'em' K_49 'es' aK_49 'uo' K_49 'ut' K_49 'e' K_49 'i' K_49
-            'u' K_49
+            'uv{sv}i' K_49 'u{c'}i' K_49 'usmo' K_49 'uste' K_49 'uvsi' aK_49
+            'emo' K_49 'imo' K_49 'ite' K_49 'uci' aK_49 'ula' K_49 'ule' K_49
+            'uli' K_49 'ulo' K_49 'uta' K_49 'uti' K_49 'uto' K_49 'em' K_49
+            'uo' K_49 'ut' K_49
           ) delete )
         or
         // .+ni vši|smo|ste|ti|mo|te|mo|te|la|lo|le|li|m|š|o
         ( [substring] among (
-            'v{sv}i' K_50 '{sv}' K_50 'smo' K_50 'ste' K_50 'vsi' aK_50 'la' K_50
-            'le' K_50 'li' K_50 'lo' K_50 'mo' K_50 'te' K_50 'ti' K_50 'm' K_50
-            'o' K_50 's' aK_50
+            'v{sv}i' K_50 'smo' K_50 'vsi' aK_50 'la' K_50 'le' K_50 'li' K_50
+            'lo' K_50 'mo' K_50 'te' K_50 'ti' K_50 'm' K_50 'o' K_50
           ) delete )
         or
         // .+((a|r|i|p|e|u)st|[^o]g|ik|uc|oj|aj|lj|ak|ck|čk|šk|uk|nj|im|ar|at|et|št|it|ot|ut|zn|zv)a jući|vši|smo|ste|jmo|jte|jem|mo|te|je|ju|ti|še|hu|la|li|le|lo|na|no|ni|ne|t|h|o|j|n|m|š
         ( [substring] among (
             'ju{c'}i' K_51 'v{sv}i' K_51 '{sv}e' K_51 'juci' aK_51 '{sv}' K_51
-            'jem' K_51 'jmo' K_51 'jte' K_51 'smo' K_51 'ste' K_51 'vsi' aK_51
-            'hu' K_51 'je' K_51 'ju' K_51 'la' K_51 'le' K_51 'li' K_51 'lo' K_51
-            'mo' K_51 'na' K_51 'ne' K_51 'ni' K_51 'no' K_51 'se' aK_51 'te' K_51
-            'ti' K_51 'h' K_51 'j' K_51 'm' K_51 'n' K_51 'o' K_51 's' aK_51
-            't' K_51
+            'jem' K_51 'jmo' K_51 'jte' K_51 'smo' K_51 'vsi' aK_51 'hu' K_51
+            'je' K_51 'ju' K_51 'la' K_51 'le' K_51 'li' K_51 'lo' K_51 'mo' K_51
+            'se' aK_51 'te' K_51 'ti' K_51 'h' K_51 'j' K_51 'm' K_51 'o' K_51
+            's' aK_51 't' K_51
           ) delete )
         or
         // .+ur ajući|asmo|aste|ajmo|ajte|amo|ate|aju|ati|aše|ahu|ala|ali|ale|alo|ana|ano|ani|ane|al|at|ah|ao|aj|an|am|aš
         ( [substring] among (
             'aju{c'}i' K_52 'a{sv}e' K_52 'ajuci' aK_52 'a{sv}' K_52 'ajmo' K_52
-            'ajte' K_52 'asmo' K_52 'aste' K_52 'ahu' K_52 'aju' K_52 'ala' K_52
-            'ale' K_52 'ali' K_52 'alo' K_52 'amo' K_52 'ana' K_52 'ane' K_52
-            'ani' K_52 'ano' K_52 'ase' aK_52 'ate' K_52 'ati' K_52 'ah' K_52
-            'aj' K_52 'al' K_52 'am' K_52 'an' K_52 'ao' K_52 'as' aK_52 'at' K_52
+            'ajte' K_52 'asmo' K_52 'ahu' K_52 'ala' K_52 'ale' K_52 'ali' K_52
+            'alo' K_52 'ase' aK_52 'ate' K_52 'ati' K_52 'ah' K_52 'al' K_52
+            'am' K_52 'ao' K_52 'as' aK_52 'at' K_52
           ) delete )
         or
         // .+(a|i|o)staj asmo|aste|ahu|ati|emo|ete|aše|ali|ući|ala|alo|ale|mo|ao|em|eš|at|ah|te|e|u|
         ( [substring] among (
-            'a{sv}e' K_53 'u{c'}i' K_53 'e{sv}' K_53 'asmo' K_53 'aste' K_53
-            'ahu' K_53 'ala' K_53 'ale' K_53 'ali' K_53 'alo' K_53 'ase' aK_53
-            'ati' K_53 'emo' K_53 'ete' K_53 'uci' aK_53 'ah' K_53 'ao' K_53
-            'at' K_53 'em' K_53 'es' aK_53 'mo' K_53 'te' K_53 'e' K_53 'u' K_53
+            'u{c'}i' K_53 'emo' K_53 'uci' aK_53 'em' K_53 'mo' K_53 'te' K_53
+            'e' K_53 'u' K_53
           ) delete )
         or K_53
         or
@@ -915,101 +891,72 @@ backwardmode (
         or
         // .+(t|č|j|ž|š)aj evima|evi|eva|eve|ama|ima|em|a|e|i|u|
         ( [substring] among (
-            'evima' K_55 'ama' K_55 'eva' K_55 'eve' K_55 'evi' K_55 'ima' K_55
-            'em' K_55 'a' K_55 'e' K_55 'i' K_55 'u' K_55
+            'ama' K_55 'ima' K_55 'em' K_55 'a' K_55 'e' K_55 'i' K_55 'u' K_55
           ) delete )
         or K_55
         or
         // .+([^o]m|ič|nč|uč|b|c|ć|d|đ|h|j|k|l|n|p|r|s|š|v|z|ž)a jući|vši|smo|ste|jmo|jte|mo|te|ju|ti|še|hu|la|li|le|lo|na|no|ni|ne|t|h|o|j|n|m|š
         ( [substring] among (
             'ju{c'}i' K_56 'v{sv}i' K_56 '{sv}e' K_56 'juci' aK_56 '{sv}' K_56
-            'jmo' K_56 'jte' K_56 'smo' K_56 'ste' K_56 'vsi' aK_56 'hu' K_56
-            'ju' K_56 'la' K_56 'le' K_56 'li' K_56 'lo' K_56 'mo' K_56 'na' K_56
-            'ne' K_56 'ni' K_56 'no' K_56 'se' aK_56 'te' K_56 'ti' K_56 'h' K_56
-            'j' K_56 'm' K_56 'n' K_56 'o' K_56 's' aK_56 't' K_56
+            'jmo' K_56 'jte' K_56 'smo' K_56 'vsi' aK_56 'hu' K_56 'ju' K_56
+            'la' K_56 'le' K_56 'li' K_56 'lo' K_56 'mo' K_56 'se' aK_56 'te' K_56
+            'ti' K_56 'h' K_56 'j' K_56 'm' K_56 'o' K_56 's' aK_56 't' K_56
           ) delete )
         or
         // .+(a|i|o)sta dosmo|doste|doše|nemo|demo|nete|dete|nimo|nite|nila|vši|nem|dem|neš|deš|doh|de|ti|ne|nu|du|la|li|lo|le|t|o
         ( [substring] among (
-            'do{sv}e' K_57 'de{sv}' K_57 'ne{sv}' K_57 'v{sv}i' K_57 'dosmo' K_57
-            'doste' K_57 'demo' K_57 'dete' K_57 'dose' aK_57 'nemo' K_57
-            'nete' K_57 'nila' K_57 'nimo' K_57 'nite' K_57 'dem' K_57 'des' aK_57
-            'doh' K_57 'nem' K_57 'nes' aK_57 'vsi' aK_57 'de' K_57 'du' K_57
-            'la' K_57 'le' K_57 'li' K_57 'lo' K_57 'ne' K_57 'nu' K_57 'ti' K_57
-            'o' K_57 't' K_57
+            'v{sv}i' K_57 'dosmo' K_57 'demo' K_57 'dem' K_57 'doh' K_57 'de' K_57
+            'du' K_57 'ti' K_57 'o' K_57 't' K_57
           ) delete )
         or
         // .+ta smo|ste|jmo|jte|vši|ti|mo|te|ju|še|la|lo|le|li|na|no|ni|ne|n|j|o|m|š|t|h
         ( [substring] among (
-            'v{sv}i' K_58 '{sv}e' K_58 '{sv}' K_58 'jmo' K_58 'jte' K_58 'smo' K_58
-            'ste' K_58 'vsi' aK_58 'ju' K_58 'la' K_58 'le' K_58 'li' K_58 'lo' K_58
-            'mo' K_58 'na' K_58 'ne' K_58 'ni' K_58 'no' K_58 'se' aK_58 'te' K_58
-            'ti' K_58 'h' K_58 'j' K_58 'm' K_58 'n' K_58 'o' K_58 's' aK_58
-            't' K_58
+            'v{sv}i' K_58 'jmo' K_58 'jte' K_58 'smo' K_58 'vsi' aK_58 'mo' K_58
+            'te' K_58 'ti' K_58 'h' K_58 'm' K_58 'o' K_58 't' K_58
           ) delete )
         or
         // .+inj asmo|aste|ati|emo|ete|ali|ala|alo|ale|aše|ahu|em|eš|at|ah|ao
         ( [substring] among (
-            'a{sv}e' K_59 'e{sv}' K_59 'asmo' K_59 'aste' K_59 'ahu' K_59 'ala' K_59
-            'ale' K_59 'ali' K_59 'alo' K_59 'ase' aK_59 'ati' K_59 'emo' K_59
-            'ete' K_59 'ah' K_59 'ao' K_59 'at' K_59 'em' K_59 'es' aK_59
+            'emo' K_59 'em' K_59
           ) delete )
         or
         // .+as temo|tete|timo|tite|tući|tem|teš|tao|te|li|ti|la|lo|le
         ( [substring] among (
-            'tu{c'}i' K_60 'te{sv}' K_60 'temo' K_60 'tete' K_60 'timo' K_60
-            'tite' K_60 'tuci' aK_60 'tao' K_60 'tem' K_60 'tes' aK_60 'la' K_60
-            'le' K_60 'li' K_60 'lo' K_60 'te' K_60 'ti' K_60
+            'tu{c'}i' K_60 'temo' K_60 'timo' K_60 'tite' K_60 'tuci' aK_60
+            'tem' K_60 'la' K_60 'le' K_60 'li' K_60 'lo' K_60
           ) delete )
         or
         // .+(elj|ulj|tit|ac|ič|od|oj|et|av|ov)i vši|eći|smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o
         ( [substring] among (
-            'e{c'}i' K_61 'v{sv}i' K_61 '{sv}e' K_61 '{sv}' K_61 'eci' aK_61
-            'smo' K_61 'ste' K_61 'vsi' aK_61 'la' K_61 'le' K_61 'li' K_61
-            'lo' K_61 'mo' K_61 'se' aK_61 'te' K_61 'ti' K_61 'h' K_61 'm' K_61
-            'o' K_61 's' aK_61 't' K_61
+            'e{c'}i' K_61 'v{sv}i' K_61 'eci' aK_61 'smo' K_61 'vsi' aK_61 'la' K_61
+            'le' K_61 'li' K_61 'lo' K_61 'mo' K_61 'te' K_61 'ti' K_61 'h' K_61
+            'm' K_61 'o' K_61 't' K_61
           ) delete )
         or
         // .+(tit|jeb|ar|ed|uš|ič)i jemo|jete|jem|ješ|smo|ste|jmo|jte|vši|mo|še|te|ti|ju|je|la|lo|li|le|t|m|š|h|j|o
         ( [substring] among (
-            'je{sv}' K_62 'v{sv}i' K_62 '{sv}e' K_62 'jemo' K_62 'jete' K_62
-            '{sv}' K_62 'jem' K_62 'jes' aK_62 'jmo' K_62 'jte' K_62 'smo' K_62
-            'ste' K_62 'vsi' aK_62 'je' K_62 'ju' K_62 'la' K_62 'le' K_62 'li' K_62
-            'lo' K_62 'mo' K_62 'se' aK_62 'te' K_62 'ti' K_62 'h' K_62 'j' K_62
-            'm' K_62 'o' K_62 's' aK_62 't' K_62
+            'v{sv}i' K_62 'jemo' K_62 'jem' K_62 'jmo' K_62 'jte' K_62 'smo' K_62
+            'vsi' aK_62 'je' K_62 'ju' K_62 'la' K_62 'le' K_62 'li' K_62 'lo' K_62
+            'mo' K_62 'te' K_62 'ti' K_62 'h' K_62 'j' K_62 'm' K_62 'o' K_62
+            't' K_62
           ) delete )
         or
         // .+(b|č|d|l|m|p|r|s|š|ž)i jemo|jete|jem|ješ|smo|ste|jmo|jte|vši|mo|lu|še|te|ti|ju|je|la|lo|li|le|t|m|š|h|j|o
         ( [substring] among (
-            'je{sv}' K_63 'v{sv}i' K_63 '{sv}e' K_63 'jemo' K_63 'jete' K_63
-            '{sv}' K_63 'jem' K_63 'jes' aK_63 'jmo' K_63 'jte' K_63 'smo' K_63
-            'ste' K_63 'vsi' aK_63 'je' K_63 'ju' K_63 'la' K_63 'le' K_63 'li' K_63
-            'lo' K_63 'lu' K_63 'mo' K_63 'se' aK_63 'te' K_63 'ti' K_63 'h' K_63
-            'j' K_63 'm' K_63 'o' K_63 's' aK_63 't' K_63
+            'v{sv}i' K_63 'jemo' K_63 'jem' K_63 'jmo' K_63 'jte' K_63 'smo' K_63
+            'vsi' aK_63 'je' K_63 'ju' K_63 'la' K_63 'le' K_63 'li' K_63 'lo' K_63
+            'lu' K_63 'mo' K_63 'te' K_63 'ti' K_63 'h' K_63 'j' K_63 'm' K_63
+            'o' K_63 't' K_63
           ) delete )
         or
         // .+luč ujete|ujući|ujemo|ujem|uješ|ismo|iste|ujmo|ujte|uje|uju|iše|iti|imo|ite|ila|ilo|ili|ile|ena|eno|eni|ene|uj|io|en|im|iš|it|ih|e|i
         ( [substring] among (
-            'uju{c'}i' K_64 'uje{sv}' K_64 'i{sv}e' K_64 'i{sv}' K_64 'ujemo' K_64
-            'ujete' K_64 'ujuci' aK_64 'ismo' K_64 'iste' K_64 'ujem' K_64
-            'ujes' aK_64 'ujmo' K_64 'ujte' K_64 'ena' K_64 'ene' K_64 'eni' K_64
-            'eno' K_64 'ila' K_64 'ile' K_64 'ili' K_64 'ilo' K_64 'imo' K_64
-            'ise' aK_64 'ite' K_64 'iti' K_64 'uje' K_64 'uju' K_64 'en' K_64
-            'ih' K_64 'im' K_64 'io' K_64 'is' aK_64 'it' K_64 'uj' K_64 'e' K_64
-            'i' K_64
-          ) delete )
-        or
-        // .+jeti smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o
-        ( [substring] among (
-            '{sv}e' K_65 '{sv}' K_65 'smo' K_65 'ste' K_65 'la' K_65 'le' K_65
-            'li' K_65 'lo' K_65 'mo' K_65 'se' aK_65 'te' K_65 'ti' K_65 'h' K_65
-            'm' K_65 'o' K_65 's' aK_65 't' K_65
+            'ujte' K_64 'e' K_64 'i' K_64
           ) delete )
         or
         // .+e lama|lima|lom|lu|li|la|le|lo|l
         ( [substring] among (
-            'lama' K_66 'lima' K_66 'lom' K_66 'la' K_66 'le' K_66 'li' K_66
-            'lo' K_66 'lu' K_66 'l' K_66
+            'lama' K_66
           ) delete )
         or
         // .+i lama|lima|lom|lu|li|la|le|lo|l
@@ -1020,49 +967,35 @@ backwardmode (
         or
         // .+at ijega|ijemu|ijima|ijeg|ijem|ijih|ijim|ima|oga|ome|omu|iji|ije|ija|iju|oj|og|om|im|ih|a|u|i|e|o|
         ( [substring] among (
-            'ijega' K_68 'ijemu' K_68 'ijima' K_68 'ijeg' K_68 'ijem' K_68
-            'ijih' K_68 'ijim' K_68 'ija' K_68 'ije' K_68 'iji' K_68 'iju' K_68
-            'ima' K_68 'oga' K_68 'ome' K_68 'omu' K_68 'ih' K_68 'im' K_68
-            'og' K_68 'oj' K_68 'om' K_68 'a' K_68 'e' K_68 'i' K_68 'o' K_68
-            'u' K_68
+            'ijega' K_68 'ijemu' K_68 'ijeg' K_68 'ijem' K_68 'ijih' K_68
+            'ijim' K_68 'ima' K_68 'oga' K_68 'ome' K_68 'omu' K_68 'ih' K_68
+            'im' K_68 'og' K_68 'oj' K_68 'om' K_68 'a' K_68 'e' K_68 'i' K_68
+            'o' K_68 'u' K_68
           ) delete )
         or K_68
         or
         // .+et avši|ući|emo|imo|em|eš|e|u|i
         ( [substring] among (
-            'av{sv}i' K_69 'u{c'}i' K_69 'e{sv}' K_69 'avsi' aK_69 'emo' K_69
-            'imo' K_69 'uci' aK_69 'em' K_69 'es' aK_69 'e' K_69 'i' K_69 'u' K_69
+            'u{c'}i' K_69 'emo' K_69 'uci' aK_69 'em' K_69
           ) delete )
         or
         // .+ ajući|alima|alom|avši|asmo|aste|ajmo|ajte|ivši|amo|ate|aju|ati|aše|ahu|ali|ala|ale|alo|ana|ano|ani|ane|am|aš|at|ah|ao|aj|an
         ( [substring] among (
             'aju{c'}i' R1 'av{sv}i' R1 'iv{sv}i' R1 'a{sv}e' R1 'ajuci' aR1
-            'alima' R1 'a{sv}' R1 'ajmo' R1 'ajte' R1 'alom' R1 'asmo' R1 'aste' R1
-            'avsi' aR1 'ivsi' aR1 'ahu' R1 'aju' R1 'ala' R1 'ale' R1 'ali' R1
-            'alo' R1 'amo' R1 'ana' R1 'ane' R1 'ani' R1 'ano' R1 'ase' aR1 'ate' R1
-            'ati' R1 'ah' R1 'aj' R1 'am' R1 'an' R1 'ao' R1 'as' aR1 'at' R1
+            'alima' R1 'a{sv}' R1 'ajmo' R1 'ajte' R1 'alom' R1 'asmo' R1 'avsi' aR1
+            'ivsi' aR1 'ahu' R1 'aju' R1 'ala' R1 'ale' R1 'ali' R1 'alo' R1
+            'amo' R1 'ase' aR1 'ah' R1 'aj' R1 'am' R1 'ao' R1 'as' aR1
           ) delete )
         or
         // .+ anje|enje|anja|enja|enom|enoj|enog|enim|enih|anom|anoj|anog|anim|anih|eno|ovi|ova|oga|ima|ove|enu|anu|ena|ama
         ( [substring] among (
-            'anih' R1 'anim' R1 'anja' R1 'anje' R1 'anog' R1 'anoj' R1 'anom' R1
-            'enih' R1 'enim' R1 'enja' R1 'enje' R1 'enog' R1 'enoj' R1 'enom' R1
-            'ama' R1 'anu' R1 'ena' R1 'eno' R1 'enu' R1 'ima' R1 'oga' R1 'ova' R1
-            'ove' R1 'ovi' R1
-          ) delete )
-        or
-        // .+ nijega|nijemu|nijima|nijeg|nijem|nijim|nijih|nima|niji|nije|nija|niju|noj|nom|nog|nim|nih|an|na|nu|ni|ne|no
-        ( [substring] among (
-            'nijega' R1 'nijemu' R1 'nijima' R1 'nijeg' R1 'nijem' R1 'nijih' R1
-            'nijim' R1 'nija' R1 'nije' R1 'niji' R1 'niju' R1 'nima' R1 'nih' R1
-            'nim' R1 'nog' R1 'noj' R1 'nom' R1 'an' R1 'na' R1 'ne' R1 'ni' R1
-            'no' R1 'nu' R1
+            'ama' R1 'ima' R1 'oga' R1 'ova' R1 'ove' R1 'ovi' R1
           ) delete )
         or
         // .+ om|og|im|ih|em|oj|an|u|o|i|e|a
         ( [substring] among (
-            'an' R1 'em' R1 'ih' R1 'im' R1 'og' R1 'oj' R1 'om' R1 'a' R1 'e' R1
-            'i' R1 'o' R1 'u' R1
+            'em' R1 'ih' R1 'im' R1 'og' R1 'oj' R1 'om' R1 'a' R1 'e' R1 'i' R1
+            'o' R1 'u' R1
           ) delete )
     )
 
